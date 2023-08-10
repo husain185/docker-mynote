@@ -1,0 +1,35 @@
+pipeline{
+    agent any
+    stages{
+        stage('code checkout'){
+            steps{
+                git url:"https://github.com/LondheShubham153/django-notes-app.git" ,branch: "main"
+            }
+        }
+        
+        stage('Build'){
+            steps{
+                sh "docker build -t my-note-app ."
+            }
+        }
+        
+        
+        stage('push to docker hub'){
+            steps{
+            //     withCredentials([usernamePassword(credentialsId:"dockerhub",passwordVariable:"dckr_pat_mKuZNTZ2xEiLcZn5l2m2BblhJsg",usernameVariable:"husain185")]){
+            //     sh "docker login -u ${env.husain185} --password-stdin ${env.dckr_pat_mKuZNTZ2xEiLcZn5l2m2BblhJsg}"
+            // }
+            sh "docker tag my-note-app husain185/my-note-app:latest"
+            sh "docker login -u husain185 -p dckr_pat_mKuZNTZ2xEiLcZn5l2m2BblhJsg"
+            sh "docker push husain185/my-note-app:latest"
+            }
+        }
+        
+         stage('Deploy'){
+            steps{
+               sh "docker run -d -p 8000:8000 husain185/my-note-app:latest"
+               sh "docker-compose down && docker-compose up -d"
+            }
+        }
+    }
+}
